@@ -1,37 +1,70 @@
+import random
 import pyaudio
 import numpy as np
 import time
+import matplotlib.pyplot as plt
+
+RATE =48000
+CHUNK=2**12
+width = 2
+
+
+# creating a list that stores the x values
+xList = []
+i = 0
+for i in range(CHUNK):
+    xList.append(i)
+
+# create the figure
+fig, ax = plt.subplots()
+ln, = ax.plot([], [])
+
+plt.xlim(0, CHUNK)
+plt.ylim(-1, 1)
+
+def displayGraph(samples):
+    x = xList
+    y = samples
+    ln.set_data(x, y)
+    print("Asdf")
+    plt.pause(0.1)
+
 
 p = pyaudio.PyAudio()
 
-CHANNELS = 2
-RATE = 44100
-CHUNK = 2**4
+# callback function to stream audio, another thread.
+def callback(in_data,frame_count, time_info, status):
+    audio = np.frombuffer(in_data)
+    return (audio, pyaudio.paContinue)
 
-def callback(in_data, frame_count, time_info, flag):
-    # using Numpy to convert to array for processing
-    audio_data = np.frombuffer(in_data, dtype=np.float32)
+#create a pyaudio object
+inStream = p.open(format = p.get_format_from_width(width, unsigned=False),
+                       channels=1,
+                       rate=RATE,
+                       input=True,
+                       frames_per_buffer=CHUNK,
+                       stream_callback = callback)
+
+"""
+Setting up the array that will handle the timeseries of audio data from our input
+"""
+audio = np.empty((CHUNK),dtype="float")
+inStream.start_stream()
+
+while True:
     x = 0
-    for a in audio_data:
-        a *= 1.1
-        #print("asdf")
-    print("------------------------ ")
-    return audio_data, pyaudio.paContinue
 
-stream = p.open(format=pyaudio.paFloat32,
-                channels=CHANNELS,
-                rate=RATE,
-                output=True,
-                input=True,
-                frames_per_buffer=CHUNK,
-                stream_callback=callback)
+#while True:
+#  try:
+#      time.sleep(.1)
+#      #displayGraph(gSample)
 
-stream.start_stream()
+#  except KeyboardInterrupt:
 
-while stream.is_active():
-    time.sleep(20)
-    stream.stop_stream()
-    print("Stream is stopped")
+#    inStream.stop_stream()
+#    inStream.close()
+#    p.terminate()
+#    print("* Killed Process")
+#    quit()
 
-stream.close()
-p.terminate()
+
