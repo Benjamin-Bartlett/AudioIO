@@ -3,6 +3,7 @@ import numpy as np
 import wave
 import sounddevice as sd
 import soundfile as sf
+#import pydub
 import matplotlib.pyplot as plt
 import time
 
@@ -70,11 +71,10 @@ times = np.linspace(0, time, num=frames)
 
 showinggraph = True
 while showinggraph:
-    graph = str(input("Which graph do you want to see? 'Close' to terminate"))
-    print("Press space to close graph")
+    graph = str(input("Which graph do you want to see, w or s? 'Close' to terminate"))
     if graph.lower() == "close":
         break;
-    if graph.lower() == "wave form":
+    if graph.lower() == "w":
         plt.figure(figsize=(15,5))
         plt.plot(times,audio_array)
         plt.ylabel('Signal Wave')
@@ -83,7 +83,7 @@ while showinggraph:
         plt.title('Sound')
         plt.show()
 
-    if graph.lower() == "spectograph":
+    if graph.lower() == "s":
         plt.figure(figsize=(15, 5))
         plt.specgram(audio_array, Fs=sample_freq)
         plt.title('Left Channel')
