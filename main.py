@@ -1,6 +1,8 @@
 import pyaudio
 import numpy as np
 import wave
+import sounddevice as sd
+import soundfile as sf
 import matplotlib.pyplot as plt
 import time
 
@@ -51,11 +53,15 @@ sFile.setframerate(RATE)
 sFile.writeframes(b''.join(frames))
 sFile.close()
 
+data, fs = sf.read('recoding.wav', dtype = 'int16')
+sd.play(data, fs)
+status = sd.wait()
+
 file = wave.open('recoding.wav','rb')
 sample_freq = file.getframerate()
 frames = file.getnframes()
 signal_wave = file.readframes(-1)
-file.close
+file.close()
 
 time = frames / sample_freq
 
@@ -68,4 +74,14 @@ plt.ylabel('Signal Wave')
 plt.xlabel('Time(s)')
 plt.xlim(0,time)
 plt.title('Sound')
+plt.show()
+
+
+plt.figure(figsize=(15, 5))
+plt.specgram(audio_array, Fs=sample_freq)
+plt.title('Left Channel')
+plt.ylabel('Frequency (Hz)')
+plt.xlabel('Time (s)')
+plt.xlim(0, time)
+plt.colorbar()
 plt.show()
