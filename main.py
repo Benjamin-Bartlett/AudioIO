@@ -68,20 +68,27 @@ time = frames / sample_freq
 audio_array = np.frombuffer(signal_wave, dtype = np.float32)
 times = np.linspace(0, time, num=frames)
 
-plt.figure(figsize=(15,5))
-plt.plot(times,audio_array)
-plt.ylabel('Signal Wave')
-plt.xlabel('Time(s)')
-plt.xlim(0,time)
-plt.title('Sound')
-plt.show()
+showinggraph = True
+while showinggraph:
+    graph = str(input("Which graph do you want to see? 'Close' to terminate"))
+    print("Press space to close graph")
+    if graph.lower() == "close":
+        break;
+    if graph.lower() == "wave form":
+        plt.figure(figsize=(15,5))
+        plt.plot(times,audio_array)
+        plt.ylabel('Signal Wave')
+        plt.xlabel('Time(s)')
+        plt.xlim(0,time)
+        plt.title('Sound')
+        plt.show()
 
-
-plt.figure(figsize=(15, 5))
-plt.specgram(audio_array, Fs=sample_freq)
-plt.title('Left Channel')
-plt.ylabel('Frequency (Hz)')
-plt.xlabel('Time (s)')
-plt.xlim(0, time)
-plt.colorbar()
-plt.show()
+    if graph.lower() == "spectograph":
+        plt.figure(figsize=(15, 5))
+        plt.specgram(audio_array, Fs=sample_freq)
+        plt.title('Left Channel')
+        plt.ylabel('Frequency (Hz)')
+        plt.xlabel('Time (s)')
+        plt.xlim(0, time)
+        plt.colorbar()
+        plt.show()
