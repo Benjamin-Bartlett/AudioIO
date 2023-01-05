@@ -80,7 +80,7 @@ def update_plot(frame):
         try:
             data = q.get_nowait()
             for d in data:
-                d *=2
+                d *=5
         except queue.Empty:
             break
         shift = len(data)
@@ -91,7 +91,12 @@ def update_plot(frame):
     return lines
 
 
+
+
 try:
+
+
+
     if args.samplerate is None:
         device_info = sd.query_devices(args.device, 'input')
         args.samplerate = device_info['default_samplerate']
@@ -117,5 +122,7 @@ try:
     ani = FuncAnimation(fig, update_plot, interval=args.interval, blit=True)
     with stream:
         plt.show()
+        sd.play(plotdata)
+
 except Exception as e:
     parser.exit(type(e).__name__ + ': ' + str(e))

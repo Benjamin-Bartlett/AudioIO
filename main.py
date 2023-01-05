@@ -3,14 +3,22 @@ import numpy as np
 import wave
 import sounddevice as sd
 import soundfile as sf
-#import pydub
 import matplotlib.pyplot as plt
 import time
+
+
+
+
+
+
+
+
+
 
 p = pyaudio.PyAudio()
 CHANNELS = 1
 RATE = 44100
-CHUNK = 3200
+CHUNK = 800
 
 #def callback(in_data, frame_count, time_info, flag):
     # using Numpy to convert to array for processing
@@ -22,7 +30,7 @@ CHUNK = 3200
     #print("------------------------ ")
     #return audio_data, pyaudio.paContinue
 
-stream = p.open(format=pyaudio.paFloat32,
+stream = p.open(format=pyaudio.paInt32,
                 channels=CHANNELS,
                 rate=RATE,
                 output=True,
@@ -37,6 +45,8 @@ secondTack = 0
 secondCount = 0
 for i in range(0, int(RATE/CHUNK*seconds)):
     data = stream.read(CHUNK)
+    for d in data:
+        d *= 5
     frames.append(data)
 
 #while stream.is_active():
@@ -49,12 +59,13 @@ p.terminate()
 
 sFile = wave.open('recoding.wav','wb')
 sFile.setnchannels(CHANNELS)
-sFile.setsampwidth(p.get_sample_size(pyaudio.paFloat32))
+sFile.setsampwidth(p.get_sample_size(pyaudio.paInt32))
+
 sFile.setframerate(RATE)
 sFile.writeframes(b''.join(frames))
 sFile.close()
 
-data, fs = sf.read('recoding.wav', dtype = 'int16')
+data, fs = sf.read('recoding.wav', dtype = 'float32')
 sd.play(data, fs)
 status = sd.wait()
 
@@ -66,7 +77,7 @@ file.close()
 
 time = frames / sample_freq
 
-audio_array = np.frombuffer(signal_wave, dtype = np.float32)
+audio_array = np.frombuffer(signal_wave, dtype = np.int32)
 times = np.linspace(0, time, num=frames)
 
 showinggraph = True
