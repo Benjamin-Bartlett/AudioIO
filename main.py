@@ -4,6 +4,8 @@ import wave
 import sounddevice as sd
 import soundfile as sf
 import matplotlib.pyplot as plt
+from pydub import AudioSegment
+from pydub.playback import play
 import time
 
 
@@ -14,11 +16,17 @@ import time
 
 
 
-
-p = pyaudio.PyAudio()
 CHANNELS = 1
 RATE = 44100
 CHUNK = 800
+p = pyaudio.PyAudio()
+seconds = int(input("How many seconds would you like to record for"))
+
+def speedx(sound_array, factor):
+    """ Multiplies the sound's speed by some `factor` """
+    indices = np.round( np.arange(0, len(sound_array), factor) )
+    indices = indices[indices < len(sound_array)].astype(int)
+    return sound_array[ indices.astype(int) ]
 
 #def callback(in_data, frame_count, time_info, flag):
     # using Numpy to convert to array for processing
@@ -37,16 +45,20 @@ stream = p.open(format=pyaudio.paInt32,
                 input=True,
                 frames_per_buffer=CHUNK,)
                 #stream_callback=callback)
+
 #testing
-seconds = 5
+seconds = seconds
+print(seconds, type(seconds))
 #stream.start_stream()
 frames = []
 secondTack = 0
 secondCount = 0
+soundscale = 1
 for i in range(0, int(RATE/CHUNK*seconds)):
     data = stream.read(CHUNK)
     for d in data:
-        d *= 5
+        d *= 0
+        soundscale+=5
     frames.append(data)
 
 #while stream.is_active():
@@ -56,6 +68,7 @@ for i in range(0, int(RATE/CHUNK*seconds)):
 stream.stop_stream()
 stream.close()
 p.terminate()
+#speedx(frames, 20)
 
 sFile = wave.open('recoding.wav','wb')
 sFile.setnchannels(CHANNELS)
@@ -65,9 +78,24 @@ sFile.setframerate(RATE)
 sFile.writeframes(b''.join(frames))
 sFile.close()
 
+
 data, fs = sf.read('recoding.wav', dtype = 'float32')
 sd.play(data, fs)
 status = sd.wait()
+
+cut = (str)(input("Type y to cut sound"))
+if (cut == "y"):
+    start = (int)(input("Start millisecond"))
+    end = (int)(input("Ending millisecond"))
+
+    sound = AudioSegment.from_wav("recoding.wav")
+    extract = sound[start:end]
+
+    extract.export("trimmed_output_pydub.wav", format="wav")
+
+    data, fs = sf.read('trimmed_output_pydub.wav', dtype = 'float32')
+    sd.play(data, fs)
+    status = sd.wait()
 
 file = wave.open('recoding.wav','rb')
 sample_freq = file.getframerate()
