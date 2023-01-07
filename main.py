@@ -178,7 +178,8 @@ def playLoop():
 # User inputs how long they want quiet
 #***********
 def glideSound():
-    glide=int(input("How many milliseconds would you like quiet? Effect may not work properly if you select more than half of recording time"))
+    print('Effect may not work properly if you select more than half of recording time')
+    glide=int(input("How many milliseconds would you like quiet? "))
     start = 0
     end = glide
 
@@ -196,11 +197,11 @@ def glideSound():
 
     middlehalf = sound[start:end]
 
-    start = seconds-glide+3
-    end = seconds-5
+    start = seconds-glide+2
+    end = seconds-2
 
     secondhalf = sound[start:end]
-    secondhalf = secondhalf - 10
+    secondhalf = secondhalf - 6
 
     newSound = firsthalf + middlehalf + secondhalf
     newSound.export("changedsound.wav", format="wav")
