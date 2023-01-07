@@ -10,25 +10,18 @@ from pydub.playback import play
 import time
 
 
-
+#Helpful variables
 CHANNELS = 1
 RATE = 44100
 CHUNK = 800
 
 
-
+#***********
+# Records audio for a given number of seconds from output stream
+# Writes data onto a wav file called recoding.wav
+#***********
 def record():
     seconds = int(input("How many seconds would you like to record for"))
-
-    #def callback(in_data, frame_count, time_info, flag):
-        # using Numpy to convert to array for processing
-        #audio_data = np.frombuffer(in_data, dtype=np.float32)
-        #x = 0
-        #for a in audio_data:
-           # a *= 1.1
-            #print("asdf")
-        #print("------------------------ ")
-        #return audio_data, pyaudio.paContinue
     p = pyaudio.PyAudio()
     stream = p.open(format=pyaudio.paInt32,
                     channels=CHANNELS,
@@ -38,31 +31,25 @@ def record():
                     frames_per_buffer=CHUNK,)
                     #stream_callback=callback)
 
-    #testing
     seconds = seconds
-    #stream.start_stream()
     frames = []
-    secondTack = 0
-    secondCount = 0
     soundscale = 1
     print("Recording")
-    for i in range(0, int(RATE/CHUNK*seconds)):
+    for i in range(0, int(RATE/CHUNK*seconds)):#keeps reading data for specified amount of seconds
         data = stream.read(CHUNK)
-        for d in data:
+        for d in data: #adds data collected to an array for future use
             d *= 0
             soundscale+=5
         frames.append(data)
 
-    #while stream.is_active():
-        #time.sleep(20)
-        #stream.stop_stream()
-        #print("Stream is stopped")
+
     stream.stop_stream()
     stream.close()
     p.terminate()
     print("Recording Stopped")
-    #speedx(frames, 20)
 
+
+    #writes data to file
     sFile = wave.open('recoding.wav','wb')
     sFile.setnchannels(CHANNELS)
     sFile.setsampwidth(p.get_sample_size(pyaudio.paInt32))
@@ -70,14 +57,23 @@ def record():
     sFile.setframerate(RATE)
     sFile.writeframes(b''.join(frames))
     sFile.close()
+
+#***********
+# Plays recoding.wav
+# Plays edited sound based on original recording as all edits can recast to recoding
+#***********
 def play():
     data, fs = sf.read('recoding.wav', dtype='float32')
     sd.play(data, fs)
     status = sd.wait()
 
+#***********
+# Takes a segment of recording
+# Casts that segment onto original recording file
+#***********
 def cut():
    cutting = "y"
-   while(cutting == "y"):
+   while(cutting == "y"): #allows users to not affect original file in order to retrim
     start = (int)(input("Start millisecond"))
     end = (int)(input("Ending millisecond"))
 
@@ -91,6 +87,9 @@ def cut():
     cutting=input("Type y to cut again anything else to stop trimming")
    extract.export("recoding.wav", format="wav")
 
+#***********
+# Produces a wave graph of the sound
+#***********
 def waveGraph():
     file = wave.open('recoding.wav', 'rb')
     sample_freq = file.getframerate()
@@ -111,6 +110,9 @@ def waveGraph():
     plt.title('Sound')
     plt.show()
 
+#***********
+# Produces a frequency graph of the sound
+#***********
 def frequencyGraph():
     file = wave.open('recoding.wav', 'rb')
     sample_freq = file.getframerate()
@@ -131,9 +133,13 @@ def frequencyGraph():
     plt.xlim(0, time)
     plt.colorbar()
     plt.show()
+#***********
+# Changes the pitch by a user entered amount of octaves
+# Does not retain same time scale
+#***********
 def pitchChanger():
     changingSound="y"
-    while(changingSound == "y"):
+    while(changingSound == "y"):#allows user to not affect original recording so they can repitch shift
         sound = AudioSegment.from_wav("recoding.wav")
         octaves = float(input("How many ocatave would you like to change(+ or -)"))
         new_sample_rate = int (sound.frame_rate * (2.0 ** octaves))
@@ -145,9 +151,12 @@ def pitchChanger():
         status = sd.wait()
         changingSound=input("Type y to change pitch again anything else to stop")
     changedSound.export("recoding.wav", format = "wav")
+#***********
+# Changes the volume by a user entered amount of octaves
+#***********
 def changeVolume():
     changingSound = "y"
-    while (changingSound == "y"):
+    while (changingSound == "y"):#allows user to not affect original recording so they can revolume shift
         volumeChange = int(input("How much would you like to change volume by + or -"))
         sound = AudioSegment.from_wav("recoding.wav")
         changedSound = sound + volumeChange
@@ -157,10 +166,17 @@ def changeVolume():
         status = sd.wait()
         changingSound = input("Type y to change volume again anything else to stop")
     changedSound.export("recoding.wav", format="wav")
+#***********
+# Plays recording a user entered amount of times
+#***********
 def playLoop():
     loops = int(input("How many times would you like to loop"))
     for i in range(0,loops):
         play()
+#***********
+# An effect that quiets the begining and end of recording
+# User inputs how long they want quiet
+#***********
 def glideSound():
     glide=int(input("How many milliseconds would you like quiet? Effect may not work properly if you select more than half of recording time"))
     start = 0
@@ -192,8 +208,11 @@ def glideSound():
     sd.play(data, fs)
     status = sd.wait()
     safe = input("type y to save effect anything else to not")
-    if safe == "y":
-        overlay.export("recoding.wav", format="wav")
+    if safe == "y": #allows user to save the effect
+        newSound.export("recoding.wav", format="wav")
+#***********
+# An effect that provides an echo
+#***********
 def echo():
     file = wave.open('recoding.wav', 'rb')
     sample_freq = file.getframerate()
@@ -210,15 +229,20 @@ def echo():
     sd.play(data, fs)
     status = sd.wait()
     safe=input("type y to save effect anything else to not")
-    if safe == "y":
+    if safe == "y": #allows user to save effect
         overlay.export("recoding.wav", format="wav")
 
+#***********
+# Exporrts the file to an Mp3
+#***********
 def export():
     name = input("What would you like to call you're file")
     sound = AudioSegment.from_wav("recoding.wav")
     sound.export(name+".mp3", format="mp3")
 
-
+#***********
+# Menu allowing for better user experience
+#***********
 window = Tk()
 window.title("Music Editor")
 window.configure(background="white")
