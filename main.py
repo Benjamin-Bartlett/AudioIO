@@ -143,7 +143,7 @@ def pitchChanger():
         data, fs = sf.read('changedsound.wav', dtype='float32')
         sd.play(data, fs)
         status = sd.wait()
-        changingSound=input("Type y to cahnge pitch again anything else to stop")
+        changingSound=input("Type y to change pitch again anything else to stop")
     changedSound.export("recoding.wav", format = "wav")
 def changeVolume():
     changingSound = "y"
@@ -155,8 +155,69 @@ def changeVolume():
         data, fs = sf.read('changedsound.wav', dtype='float32')
         sd.play(data, fs)
         status = sd.wait()
-        changingSound = input("Type y to cahnge pitch again anything else to stop")
+        changingSound = input("Type y to change volume again anything else to stop")
     changedSound.export("recoding.wav", format="wav")
+def playLoop():
+    loops = int(input("How many times would you like to loop"))
+    for i in range(0,loops):
+        play()
+def glideSound():
+    glide=int(input("How many milliseconds would you like quiet? Effect may not work properly if you select more than half of recording time"))
+    start = 0
+    end = glide
+
+    sound = AudioSegment.from_wav("recoding.wav")
+    firsthalf = sound[start:end]
+    firsthalf = firsthalf - 10
+
+    file = wave.open('recoding.wav', 'rb')
+    sample_freq = file.getframerate()
+    rate = file.getnframes()
+    seconds = sample_freq/float(rate)
+
+    start = glide+3
+    end = seconds-glide
+
+    middlehalf = sound[start:end]
+
+    start = seconds-glide+3
+    end = seconds-5
+
+    secondhalf = sound[start:end]
+    secondhalf = secondhalf - 10
+
+    newSound = firsthalf + middlehalf + secondhalf
+    newSound.export("changedsound.wav", format="wav")
+    data, fs = sf.read('changedsound.wav', dtype='float32')
+    sd.play(data, fs)
+    status = sd.wait()
+    safe = input("type y to save effect anything else to not")
+    if safe == "y":
+        overlay.export("recoding.wav", format="wav")
+def echo():
+    file = wave.open('recoding.wav', 'rb')
+    sample_freq = file.getframerate()
+    rate = file.getnframes()
+    seconds = sample_freq / float(rate)
+
+    sound = AudioSegment.from_wav("recoding.wav")
+    sound2 = AudioSegment.from_wav("recoding.wav")
+    sound3 = sound[seconds-999:seconds-1]
+    sound - 20
+    overlay = sound.overlay(sound2, position = 1000) + sound3
+    overlay.export("changedsound.wav", format="wav")
+    data, fs = sf.read('changedsound.wav', dtype='float32')
+    sd.play(data, fs)
+    status = sd.wait()
+    safe=input("type y to save effect anything else to not")
+    if safe == "y":
+        overlay.export("recoding.wav", format="wav")
+
+def export():
+    name = input("What would you like to call you're file")
+    sound = AudioSegment.from_wav("recoding.wav")
+    sound.export(name+".mp3", format="mp3")
+
 
 window = Tk()
 window.title("Music Editor")
@@ -165,9 +226,19 @@ Label(window, text="What would you like to do?", bg="white", fg= "black",font ="
 Label(window, text="Please record something before using other functions", bg="white", fg= "black",font ="none 12 bold").grid(row=2,column = 0,sticky=W)
 Button(window,text="Record",width=6,command = record).grid(row=3,column=0,sticky=W)
 Button(window,text="Play",width=6,command = play).grid(row=4,column=0,sticky=W)
-Button(window,text="Change Volume",width=14,command = changeVolume).grid(row=5,column=0,sticky=W)
-Button(window,text="Cut",width=6,command = cut).grid(row=6,column=0,sticky=W)
-Button(window,text="Wave Graph",width=10,command = waveGraph).grid(row=7,column=0,sticky=W)
-Button(window,text="Frequency Graph",width=14,command = frequencyGraph).grid(row=8,column=0,sticky=W)
+Button(window,text="Play looped",width=14,command = playLoop).grid(row=5,column=0,sticky=W)
+
+Label(window, text="Edit", bg="white", fg= "black",font ="none 12 bold").grid(row=6,column = 0,sticky=W)
+Button(window,text="Change Volume",width=14,command = changeVolume).grid(row=7,column=0,sticky=W)
+Button(window,text="Cut",width=6,command = cut).grid(row=8,column=0,sticky=W)
 Button(window,text="Change Pitch",width=14,command = pitchChanger).grid(row=9,column=0,sticky=W)
+
+Label(window, text="Effects", bg="white", fg= "black",font ="none 12 bold").grid(row=10,column = 0,sticky=W)
+Button(window,text="Glide Effect",width=14,command = glideSound).grid(row=11,column=0,sticky=W)
+Button(window,text="Echo Effect",width=14,command = echo).grid(row=12,column=0,sticky=W)
+
+Label(window, text="Miscellaneous", bg="white", fg= "black",font ="none 12 bold").grid(row=13,column = 0,sticky=W)
+Button(window,text="Wave Graph",width=10,command = waveGraph).grid(row=14,column=0,sticky=W)
+Button(window,text="Frequency Graph",width=14,command = frequencyGraph).grid(row=15,column=0,sticky=W)
+Button(window,text="Export to Mp3",width=14,command = export).grid(row=16,column=0,sticky=W)
 window.mainloop()
