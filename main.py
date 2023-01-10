@@ -157,7 +157,7 @@ def pitchChanger():
 def changeVolume():
     changingSound = "y"
     while (changingSound == "y"):#allows user to not affect original recording so they can revolume shift
-        volumeChange = int(input("How much would you like to change volume by + or -"))
+        volumeChange = int(input("How much would you like to change volume by decible count"))
         sound = AudioSegment.from_wav("recoding.wav")
         changedSound = sound + volumeChange
         changedSound.export("changedsound.wav", format="wav")
@@ -232,6 +232,7 @@ def echo():
     safe=input("type y to save effect anything else to not")
     if safe == "y": #allows user to save effect
         overlay.export("recoding.wav", format="wav")
+
 
 #***********
 # Exporrts the file to an Mp3
